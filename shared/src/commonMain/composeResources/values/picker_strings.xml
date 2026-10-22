@@ -1,0 +1,6 @@
+<resources>
+    <string name="action_ok">OK</string>
+    <string name="pick_error_title">Can\'t use this file</string>
+    <string name="pick_error_not_audio">%1$s is not a supported audio file.</string>
+    <string name="pick_error_unreadable">%1$s could not be read. The file may be damaged or protected.</string>
+</resources>

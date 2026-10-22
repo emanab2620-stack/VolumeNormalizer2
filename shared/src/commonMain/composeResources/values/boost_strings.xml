@@ -1,0 +1,21 @@
+<resources>
+    <string name="boost_title">Boost Audio</string>
+    <string name="boost_level_title">Boost Level</string>
+    <string name="boost_caption_protected">Safely increase loudness without clipping</string>
+    <string name="boost_caption_unprotected">Increases loudness. Clipping is possible.</string>
+    <string name="boost_value">+%1$d dB</string>
+    <string name="boost_value_zero">0 dB</string>
+    <string name="boost_slider_description">Boost plus %1$d decibels</string>
+    <string name="boost_slider_description_zero">Boost zero decibels</string>
+    <string name="boost_tick_max">+12 dB</string>
+
+    <string name="boost_subtle">Subtle</string>
+    <string name="boost_medium">Medium</string>
+    <string name="boost_strong">Strong</string>
+    <string name="boost_max">Max</string>
+
+    <string name="boost_warning_protected">Strong boost can change the dynamics of your audio and make background noise easier to hear.</string>
+    <string name="boost_warning_unprotected">Strong boost without Peak Protection can cause clipping and distortion, and make background noise easier to hear.</string>
+
+    <string name="boost_apply">Apply Boost</string>
+</resources>

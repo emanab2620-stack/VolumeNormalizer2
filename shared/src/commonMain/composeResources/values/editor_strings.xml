@@ -1,0 +1,15 @@
+<resources>
+    <string name="editor_title">Audio Editor</string>
+    <string name="editor_rewind">Rewind 10 seconds</string>
+    <string name="editor_forward">Forward 10 seconds</string>
+    <string name="editor_play">Play</string>
+    <string name="editor_pause">Pause</string>
+    <string name="editor_seek_description">Playback position</string>
+    <string name="editor_error">This file cannot be played.</string>
+    <string name="editor_tool_normalize_subtitle">Fix volume</string>
+    <string name="editor_tool_boost_subtitle">Increase level</string>
+    <string name="editor_audio_info">Audio Info</string>
+    <string name="editor_info_format">Format</string>
+    <string name="editor_info_duration">Duration</string>
+    <string name="editor_info_size">Size</string>
+</resources>

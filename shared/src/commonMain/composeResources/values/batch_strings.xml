@@ -1,0 +1,17 @@
+<resources>
+    <string name="batch_title">Batch Processing</string>
+    <string name="batch_description">Add multiple audio files and apply the same settings to all of them.</string>
+    <string name="batch_add_files">Add Audio Files</string>
+    <string name="batch_add_files_hint">Select multiple files</string>
+    <string name="batch_remove_file">Remove %1$s</string>
+    <string name="batch_empty">No files added yet. Add audio files to begin.</string>
+    <string name="batch_settings_title">Apply Settings to All Files</string>
+    <string name="batch_settings_summary">Normalize (%1$d LUFS) · MP3 · High Quality</string>
+    <string name="batch_settings_note">Each file is processed on its own, so every file gets its own gain.</string>
+    <string name="batch_start">Start Batch Processing</string>
+
+    <plurals name="batch_files_count">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+</resources>

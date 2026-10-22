@@ -1,0 +1,27 @@
+<resources>
+    <string name="balance_title">Balance Audio</string>
+    <string name="balance_type_title">Balance Type</string>
+    <string name="balance_help">Balance evens out loud and quiet parts. It does not move sound between the left and right speakers.</string>
+
+    <string name="balance_profile_speech">Speech</string>
+    <string name="balance_profile_music">Music</string>
+    <string name="balance_profile_mixed">Mixed</string>
+
+    <string name="balance_before">Before</string>
+    <string name="balance_after">After</string>
+    <string name="balance_visual_description">Illustration of loud and quiet parts before and after balancing</string>
+
+    <string name="balance_intensity_title">Intensity</string>
+    <string name="balance_intensity_slider_description">Balance intensity</string>
+    <string name="balance_intensity_low">Low</string>
+    <string name="balance_intensity_medium">Medium</string>
+    <string name="balance_intensity_high">High</string>
+    <string name="balance_intensity_description">Smooth loud and quiet parts for more consistent listening</string>
+
+    <string name="balance_protect_peaks_title">Protect Peaks</string>
+    <string name="balance_protect_peaks_description">Keep important details</string>
+    <string name="balance_natural_dynamics_title">Natural Dynamics</string>
+    <string name="balance_natural_dynamics_description">Maintain a natural sound</string>
+
+    <string name="balance_apply">Apply Balance</string>
+</resources>

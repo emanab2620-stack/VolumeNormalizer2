@@ -1,0 +1,14 @@
+<resources>
+    <string name="home_title">Volume Normalizer</string>
+    <string name="home_tagline">Clearer audio. Better listening.</string>
+    <string name="home_select_audio">Select Audio</string>
+    <string name="home_import_hint">Import an audio file to get started</string>
+    <string name="home_supported_formats">SUPPORTS MP3, WAV, M4A, AAC, FLAC</string>
+    <string name="tool_normalize">Normalize</string>
+    <string name="tool_boost">Boost</string>
+    <string name="tool_balance">Balance</string>
+    <string name="tool_batch">Batch</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_my_files">My Files</string>
+    <string name="nav_settings">Settings</string>
+</resources>
