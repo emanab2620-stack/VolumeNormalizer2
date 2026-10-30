@@ -26,10 +26,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +36,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.webscare.volumenormalizer.AnalysisState
+import com.webscare.volumenormalizer.formatLufs
+import com.webscare.volumenormalizer.planBoost
 import com.webscare.volumenormalizer.theme.AppColors
 import com.webscare.volumenormalizer.ui.components.ActionRowCard
 import com.webscare.volumenormalizer.ui.components.AppCard
@@ -57,12 +56,17 @@ import io.github.hlcaptain.symbols.material.rounded.vectors.Shield
 import io.github.hlcaptain.symbols.material.rounded.vectors.SignalCellularAlt
 import org.jetbrains.compose.resources.stringResource
 import volumenormalizer.shared.generated.resources.Res
+import volumenormalizer.shared.generated.resources.boost_analysis_failed
+import volumenormalizer.shared.generated.resources.boost_analyzing
 import volumenormalizer.shared.generated.resources.boost_apply
 import volumenormalizer.shared.generated.resources.boost_caption_protected
 import volumenormalizer.shared.generated.resources.boost_caption_unprotected
+import volumenormalizer.shared.generated.resources.boost_clipping_warning
+import volumenormalizer.shared.generated.resources.boost_headroom_limited
 import volumenormalizer.shared.generated.resources.boost_level_title
 import volumenormalizer.shared.generated.resources.boost_max
 import volumenormalizer.shared.generated.resources.boost_medium
+import volumenormalizer.shared.generated.resources.boost_no_headroom
 import volumenormalizer.shared.generated.resources.boost_slider_description
 import volumenormalizer.shared.generated.resources.boost_slider_description_zero
 import volumenormalizer.shared.generated.resources.boost_strong
@@ -82,11 +86,7 @@ private const val MIN_GAIN_DB = 0
 private const val MAX_GAIN_DB = 12
 private const val STRONG_WARNING_DB = 9
 
-// TODO: mock values until the importer exists
-private const val MOCK_FILE_NAME = "Podcast_Interview.mp3"
-private const val MOCK_FILE_DETAILS = "MP3 · 12.4 MB · 03:42"
-
-/** Shortcut levels. The dB values are an assumption until confirmed (matches the slider ticks). */
+/** Shortcut levels. The dB values are an assumption until confirmed (they match the slider ticks). */
 enum class BoostLevel(val gainDb: Int, val filledBars: Int) {
     Subtle(3, 1),
     Medium(6, 2),
@@ -94,31 +94,11 @@ enum class BoostLevel(val gainDb: Int, val filledBars: Int) {
     Max(12, 4)
 }
 
-/** Holds the screen state. Rotation and ViewModel handling come in a later step. */
-@Composable
-fun BoostRoute(
-    fileName: String,
-    fileDetails: String,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var gainDb by remember { mutableStateOf(BoostLevel.Medium.gainDb) }
-    var peakProtection by remember { mutableStateOf(true) }
-
-    BoostScreen(
-        fileName = fileName,
-        fileDetails = fileDetails,
-        gainDb = gainDb,
-        peakProtection = peakProtection,
-        onBack = onBack,
-        onGainChanged = { gainDb = it },
-        onLevelSelected = { gainDb = it.gainDb },
-        onPeakProtectionChange = { peakProtection = it },
-        onPreviewClick = { /* preview: later step */ },
-        onApplyClick = { /* processing: later step */ },
-        modifier = modifier
-    )
-}
+/** What the user chose on the Boost screen. Kept in App.kt so Cancel does not lose it. */
+data class BoostSettings(
+    val gainDb: Int = BoostLevel.Medium.gainDb,
+    val peakProtection: Boolean = true
+)
 
 @Composable
 fun BoostScreen(
@@ -126,6 +106,7 @@ fun BoostScreen(
     fileDetails: String,
     gainDb: Int,
     peakProtection: Boolean,
+    analysis: AnalysisState,
     onBack: () -> Unit,
     onGainChanged: (Int) -> Unit,
     onLevelSelected: (BoostLevel) -> Unit,
@@ -134,6 +115,9 @@ fun BoostScreen(
     onApplyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // The boost needs the measurement (for the peak room) and a gain above zero
+    val canApply = analysis is AnalysisState.Done && gainDb > 0
+
     Column(modifier = modifier.fillMaxSize().statusBarsPadding()) {
         ToolTopBar(
             title = stringResource(Res.string.boost_title),
@@ -156,6 +140,7 @@ fun BoostScreen(
             BoostLevelCard(
                 gainDb = gainDb,
                 peakProtection = peakProtection,
+                analysis = analysis,
                 onGainChanged = onGainChanged
             )
 
@@ -185,6 +170,7 @@ fun BoostScreen(
         PrimaryButton(
             text = stringResource(Res.string.boost_apply),
             onClick = onApplyClick,
+            enabled = canApply,
             modifier = Modifier
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
@@ -211,6 +197,7 @@ fun BoostScreen(
 private fun BoostLevelCard(
     gainDb: Int,
     peakProtection: Boolean,
+    analysis: AnalysisState,
     onGainChanged: (Int) -> Unit
 ) {
     val valueText = if (gainDb == 0) {
@@ -228,11 +215,49 @@ private fun BoostLevelCard(
     } else {
         stringResource(Res.string.boost_caption_unprotected)
     }
-    val warning: String? = when {
-        gainDb < STRONG_WARNING_DB -> null
-        peakProtection -> stringResource(Res.string.boost_warning_protected)
-        else -> stringResource(Res.string.boost_warning_unprotected)
+
+    // What we know about this file decides which notes are shown
+    val metrics = (analysis as? AnalysisState.Done)?.metrics
+    val plan = if (metrics != null && gainDb > 0) {
+        planBoost(gainDb.toDouble(), metrics, peakProtection)
+    } else {
+        null
     }
+
+    val statusText: String? = when (analysis) {
+        is AnalysisState.Analyzing -> stringResource(Res.string.boost_analyzing)
+        is AnalysisState.Failed -> stringResource(Res.string.boost_analysis_failed)
+        is AnalysisState.Done -> null
+    }
+
+    val limitText: String? = if (plan != null && plan.limitedByPeak) {
+        if (plan.appliedGainDb < 0.1) {
+            stringResource(Res.string.boost_no_headroom)
+        } else {
+            stringResource(Res.string.boost_headroom_limited, formatLufs(plan.appliedGainDb))
+        }
+    } else {
+        null
+    }
+
+    val samplePeakDb = metrics?.samplePeakDbfs
+    val willClip = !peakProtection && samplePeakDb != null && samplePeakDb + gainDb > 0.0
+
+    val notes = listOfNotNull(
+        limitText,
+        if (willClip) stringResource(Res.string.boost_clipping_warning) else null,
+        if (gainDb >= STRONG_WARNING_DB) {
+            stringResource(
+                if (peakProtection) {
+                    Res.string.boost_warning_protected
+                } else {
+                    Res.string.boost_warning_unprotected
+                }
+            )
+        } else {
+            null
+        }
+    )
 
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -300,10 +325,19 @@ private fun BoostLevelCard(
             }
         }
 
-        if (warning != null) {
+        if (statusText != null) {
             Spacer(Modifier.height(10.dp))
             Text(
-                text = warning,
+                text = statusText,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (analysis is AnalysisState.Failed) AppColors.Balance else AppColors.TextSecondary
+            )
+        }
+
+        notes.forEach { note ->
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = note,
                 style = MaterialTheme.typography.bodySmall,
                 color = AppColors.Balance
             )

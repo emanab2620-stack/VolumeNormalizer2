@@ -1,0 +1,18 @@
+<resources>
+    <string name="processing_title">Processing Audio</string>
+    <string name="processing_working">Working…</string>
+    <string name="processing_step_analyze">Analyzing Loudness</string>
+    <string name="processing_step_analyze_desc">Scanning audio levels</string>
+    <string name="processing_step_apply">Changing Volume</string>
+    <string name="processing_step_apply_desc">Applying the gain safely</string>
+    <string name="processing_step_finish">Finishing File</string>
+    <string name="processing_step_finish_desc">Saving a temporary copy</string>
+    <string name="processing_cancel">Cancel Processing</string>
+    <string name="processing_back">Back</string>
+    <string name="processing_keep_open">Keep the app open while processing</string>
+    <string name="processing_failed_title">Could not process this file</string>
+    <string name="processing_failed_unsupported">This audio format cannot be processed on this device.</string>
+    <string name="processing_failed_unreadable">The file could not be read. It may be damaged or protected.</string>
+    <string name="processing_failed_write">The temporary file could not be written.</string>
+    <string name="processing_failed_space">There is not enough free storage space.</string>
+</resources>

@@ -1,6 +1,5 @@
+
 package com.webscare.volumenormalizer.ui.components
-
-
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,13 +32,16 @@ fun ToolTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .padding(horizontal = 8.dp),
+            .heightIn(min = 64.dp)
+            .padding(horizontal = 4.dp)
+            .padding(top = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         IconButton(
             onClick = onBack,
-            modifier = Modifier.align(Alignment.CenterStart)
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 0.dp)
         ) {
             Icon(
                 imageVector = Symbols.Material.Rounded.ArrowBack,
@@ -47,6 +49,7 @@ fun ToolTopBar(
                 tint = AppColors.TextPrimary
             )
         }
+
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,

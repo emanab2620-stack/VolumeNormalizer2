@@ -133,7 +133,7 @@ fun NormalizeRoute(
         },
         onPeakProtectionChange = { peakProtection = it },
         onPreviewClick = { /* preview: later step */ },
-        onNormalizeClick = { /* processing: later step */ },
+        onNormalizeClick = { /* processing: next step */ },
         modifier = modifier
     )
 }
@@ -152,6 +152,7 @@ fun NormalizeScreen(
     onPeakProtectionChange: (Boolean) -> Unit,
     onPreviewClick: () -> Unit,
     onNormalizeClick: () -> Unit,
+    canStart: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize().statusBarsPadding()) {
@@ -210,6 +211,7 @@ fun NormalizeScreen(
         PrimaryButton(
             text = stringResource(Res.string.normalize_cta),
             onClick = onNormalizeClick,
+            enabled = canStart,
             modifier = Modifier
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp),

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +57,7 @@ import com.webscare.volumenormalizer.ui.components.ToolTopBar
 import io.github.hlcaptain.symbols.Symbols
 import io.github.hlcaptain.symbols.material.Material
 import io.github.hlcaptain.symbols.material.Rounded
+import io.github.hlcaptain.symbols.material.rounded.vectors.Equalizer
 import io.github.hlcaptain.symbols.material.rounded.vectors.Forward10
 import io.github.hlcaptain.symbols.material.rounded.vectors.GraphicEq
 import io.github.hlcaptain.symbols.material.rounded.vectors.Info
@@ -63,8 +65,10 @@ import io.github.hlcaptain.symbols.material.rounded.vectors.Pause
 import io.github.hlcaptain.symbols.material.rounded.vectors.PlayArrow
 import io.github.hlcaptain.symbols.material.rounded.vectors.Replay10
 import io.github.hlcaptain.symbols.material.rounded.vectors.SignalCellularAlt
+import io.github.hlcaptain.symbols.material.rounded.vectors.Tune
 import org.jetbrains.compose.resources.stringResource
 import volumenormalizer.shared.generated.resources.Res
+import volumenormalizer.shared.generated.resources.balance_title
 import volumenormalizer.shared.generated.resources.editor_audio_info
 import volumenormalizer.shared.generated.resources.editor_error
 import volumenormalizer.shared.generated.resources.editor_forward
@@ -77,8 +81,10 @@ import volumenormalizer.shared.generated.resources.editor_rewind
 import volumenormalizer.shared.generated.resources.editor_seek_description
 import volumenormalizer.shared.generated.resources.editor_title
 import volumenormalizer.shared.generated.resources.editor_tool_boost_subtitle
+import volumenormalizer.shared.generated.resources.editor_tool_equalize_subtitle
 import volumenormalizer.shared.generated.resources.editor_tool_normalize_subtitle
 import volumenormalizer.shared.generated.resources.tool_boost
+import volumenormalizer.shared.generated.resources.tool_equalize
 import volumenormalizer.shared.generated.resources.tool_normalize
 
 private const val SKIP_MS = 10_000L
@@ -90,6 +96,8 @@ fun EditorRoute(
     onBack: () -> Unit,
     onNormalizeClick: () -> Unit,
     onBoostClick: () -> Unit,
+    onBalanceClick: () -> Unit,
+    onEqualizeClick: () -> Unit, // <-- NAYA: Equalize click handler
     modifier: Modifier = Modifier
 ) {
     val player = rememberAudioPlayer(audio.uri, audio.durationMs)
@@ -110,6 +118,8 @@ fun EditorRoute(
         onBack = onBack,
         onNormalizeClick = onNormalizeClick,
         onBoostClick = onBoostClick,
+        onBalanceClick = onBalanceClick,
+        onEqualizeClick = onEqualizeClick, // <-- NAYA: Pass to screen
         modifier = modifier
     )
 }
@@ -131,6 +141,8 @@ fun EditorScreen(
     onBack: () -> Unit,
     onNormalizeClick: () -> Unit,
     onBoostClick: () -> Unit,
+    onBalanceClick: () -> Unit,
+    onEqualizeClick: () -> Unit, // <-- NAYA: Equalize click handler
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
@@ -177,26 +189,56 @@ fun EditorScreen(
                 )
             }
 
-            Row(
+            // Tools Grid: 2x2 Layout for Equal Sizes
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ToolTile(
-                    icon = Symbols.Material.Rounded.GraphicEq,
-                    tint = AppColors.Primary,
-                    title = stringResource(Res.string.tool_normalize),
-                    subtitle = stringResource(Res.string.editor_tool_normalize_subtitle),
-                    onClick = onNormalizeClick,
-                    modifier = Modifier.weight(1f)
-                )
-                ToolTile(
-                    icon = Symbols.Material.Rounded.SignalCellularAlt,
-                    tint = AppColors.Boost,
-                    title = stringResource(Res.string.tool_boost),
-                    subtitle = stringResource(Res.string.editor_tool_boost_subtitle),
-                    onClick = onBoostClick,
-                    modifier = Modifier.weight(1f)
-                )
+                // Row 1: Normalize & Boost
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ToolTile(
+                        icon = Symbols.Material.Rounded.GraphicEq,
+                        tint = AppColors.Primary,
+                        title = stringResource(Res.string.tool_normalize),
+                        subtitle = stringResource(Res.string.editor_tool_normalize_subtitle),
+                        onClick = onNormalizeClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ToolTile(
+                        icon = Symbols.Material.Rounded.SignalCellularAlt,
+                        tint = AppColors.Boost,
+                        title = stringResource(Res.string.tool_boost),
+                        subtitle = stringResource(Res.string.editor_tool_boost_subtitle),
+                        onClick = onBoostClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Row 2: Balance & Equalize
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ToolTile(
+                        icon = Symbols.Material.Rounded.Tune,
+                        tint = AppColors.Balance,
+                        title = stringResource(Res.string.balance_title),
+                        subtitle = "Dynamics & Loudness",
+                        onClick = onBalanceClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ToolTile(
+                        icon = Symbols.Material.Rounded.Equalizer,
+                        tint = AppColors.Primary, // Using Primary color for Equalize
+                        title = stringResource(Res.string.tool_equalize),
+                        subtitle = stringResource(Res.string.editor_tool_equalize_subtitle),
+                        onClick = onEqualizeClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             AudioInfoCard(
@@ -217,7 +259,6 @@ private fun SeekBar(
     enabled: Boolean,
     onSeek: (Long) -> Unit
 ) {
-    // While the finger is dragging we show the dragged value; the player is told only at the end
     var dragFraction by remember { mutableStateOf<Float?>(null) }
 
     val safeDurationMs = durationMs.coerceAtLeast(1L)
@@ -381,7 +422,8 @@ private fun ToolTile(
                 text = subtitle,
                 style = MaterialTheme.typography.labelSmall,
                 color = AppColors.TextSecondary,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 2
             )
         }
     }

@@ -1,5 +1,11 @@
 package com.webscare.volumenormalizer.ui.balance
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,9 +35,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +50,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.webscare.volumenormalizer.BalanceSettings
 import com.webscare.volumenormalizer.theme.AppColors
 import com.webscare.volumenormalizer.ui.components.ActionRowCard
 import com.webscare.volumenormalizer.ui.components.AppCard
@@ -63,6 +68,9 @@ import io.github.hlcaptain.symbols.material.rounded.vectors.Mic
 import io.github.hlcaptain.symbols.material.rounded.vectors.MusicNote
 import io.github.hlcaptain.symbols.material.rounded.vectors.PlayArrow
 import io.github.hlcaptain.symbols.material.rounded.vectors.Tune
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlin.math.sin
 import org.jetbrains.compose.resources.stringResource
 import volumenormalizer.shared.generated.resources.Res
 import volumenormalizer.shared.generated.resources.balance_after
@@ -86,16 +94,9 @@ import volumenormalizer.shared.generated.resources.balance_title
 import volumenormalizer.shared.generated.resources.balance_type_title
 import volumenormalizer.shared.generated.resources.balance_visual_description
 import volumenormalizer.shared.generated.resources.preview_before_after
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlin.math.sin
 
 private const val BAR_COUNT_PER_SIDE = 22
-private const val TARGET_LEVEL = 0.55f   // loudness that the "After" bars move toward
-
-// TODO: mock values until the importer exists
-private const val MOCK_FILE_NAME = "Podcast_Interview.mp3"
-private const val MOCK_FILE_DETAILS = "MP3 · 12.4 MB · 03:42"
+private const val TARGET_LEVEL = 0.55f
 
 enum class BalanceProfile { Speech, Music, Mixed }
 
@@ -107,33 +108,30 @@ private fun intensityLevel(intensity: Float): IntensityLevel = when {
     else -> IntensityLevel.High
 }
 
-/** Holds the screen state. Rotation and ViewModel handling come in a later step. */
 @Composable
 fun BalanceRoute(
     fileName: String,
     fileDetails: String,
+    settings: BalanceSettings,
+    onSettingsChange: (BalanceSettings) -> Unit,
     onBack: () -> Unit,
+    onApply: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var profile by remember { mutableStateOf(BalanceProfile.Speech) }
-    var intensity by remember { mutableStateOf(0.5f) }
-    var protectPeaks by remember { mutableStateOf(true) }
-    var naturalDynamics by remember { mutableStateOf(true) }
-
     BalanceScreen(
         fileName = fileName,
         fileDetails = fileDetails,
-        profile = profile,
-        intensity = intensity,
-        protectPeaks = protectPeaks,
-        naturalDynamics = naturalDynamics,
+        profile = settings.profile,
+        intensity = settings.intensity,
+        protectPeaks = settings.preservePeaks,
+        naturalDynamics = settings.naturalDynamics,
         onBack = onBack,
-        onProfileSelected = { profile = it },
-        onIntensityChanged = { intensity = it },
-        onProtectPeaksChange = { protectPeaks = it },
-        onNaturalDynamicsChange = { naturalDynamics = it },
-        onPreviewClick = { /* preview: later step */ },
-        onApplyClick = { /* processing: later step */ },
+        onProfileSelected = { onSettingsChange(settings.copy(profile = it)) },
+        onIntensityChanged = { onSettingsChange(settings.copy(intensity = it)) },
+        onProtectPeaksChange = { onSettingsChange(settings.copy(preservePeaks = it)) },
+        onNaturalDynamicsChange = { onSettingsChange(settings.copy(naturalDynamics = it)) },
+        onPreviewClick = { },
+        onApplyClick = { onApply() },
         modifier = modifier
     )
 }
@@ -366,16 +364,23 @@ private fun ProfileTile(
     }
 }
 
-/**
- * Illustration only (not the real audio): left = uneven loud/quiet bars (Before),
- * right = the same bars pulled toward one level (After). A higher intensity pulls them closer.
- */
 @Composable
 private fun BeforeAfterWave(
     intensity: Float,
     description: String,
     modifier: Modifier = Modifier
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "waveAnimation")
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "phase"
+    )
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -392,7 +397,7 @@ private fun BeforeAfterWave(
             val afterColor = AppColors.Balance
 
             for (i in 0 until BAR_COUNT_PER_SIDE) {
-                val before = barPattern(i)
+                val before = barPattern(i, phase)
                 val after = (TARGET_LEVEL + (before - TARGET_LEVEL) * (1f - 0.85f * intensity))
                     .coerceIn(0.1f, 1f)
 
@@ -442,10 +447,10 @@ private fun BeforeAfterWave(
     }
 }
 
-/** A fixed pattern of loud and quiet bars (0.14 to 1.0). */
-private fun barPattern(index: Int): Float {
-    val value = abs(sin(index * 0.9f) * sin(index * 0.37f + 1.3f)) +
-            0.15f * abs(sin(index * 2.3f))
+private fun barPattern(index: Int, phase: Float): Float {
+    val animatedIndex = index + (phase * 5f)
+    val value = abs(sin(animatedIndex * 0.9f) * sin(animatedIndex * 0.37f + 1.3f)) +
+            0.15f * abs(sin(animatedIndex * 2.3f))
     return (0.14f + 0.86f * value).coerceIn(0.14f, 1f)
 }
 

@@ -1,0 +1,25 @@
+<resources>
+    <string name="result_title">Result Comparison</string>
+    <string name="result_ready_title">Normalized and ready</string>
+    <string name="result_ready_title_boost">Boost applied</string>
+    <string name="result_ready_description">Your audio has been processed. The original file was not changed.</string>
+    <string name="result_limited_note">The loudest peaks were limited to avoid clipping, so the result can be slightly below the target.</string>
+    <string name="result_limited_note_boost">The loudest peaks were limited to avoid clipping, so the dynamics may have changed a little.</string>
+    <string name="result_clipped_note">Some loud parts were clipped. Turn on Peak Protection to avoid this.</string>
+    <string name="result_loudness_title">Loudness Comparison</string>
+    <string name="result_peak_title">Peak Level Comparison</string>
+    <string name="result_current">Current</string>
+    <string name="result_output">Output</string>
+    <string name="result_current_peak">Current Peak</string>
+    <string name="result_output_peak">Output Peak</string>
+    <string name="result_target">Target: %1$d LUFS</string>
+    <string name="result_gain">Gain applied: %1$s dB</string>
+    <string name="dbtp_text">%1$s dBTP</string>
+    <string name="value_not_measured">--</string>
+    <string name="result_peak_note">True peak is an estimate.</string>
+    <string name="result_preview_title">Preview Result</string>
+    <string name="result_before">Before</string>
+    <string name="result_after">After</string>
+    <string name="result_edit_again">Edit Again</string>
+    <string name="result_continue">Continue</string>
+</resources>

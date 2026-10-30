@@ -17,8 +17,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val AUDIO_MIME_TYPES = arrayOf("audio/*")
-private val SUPPORTED_EXTENSIONS = setOf("mp3", "wav", "m4a", "aac", "flac")
+// UPDATED: Added audio/ogg and audio/opus explicitly so file manager shows them
+private val AUDIO_MIME_TYPES = arrayOf("audio/*", "audio/ogg", "audio/opus")
+private val SUPPORTED_EXTENSIONS = setOf("mp3", "wav", "m4a", "aac", "flac", "opus", "ogg")
 
 @Composable
 actual fun rememberAudioPicker(
@@ -69,7 +70,6 @@ private fun readAudio(context: Context, uris: List<Uri>): PickResult {
     val rejected = mutableListOf<RejectedAudio>()
 
     for (uri in uris) {
-        // Keep access to the file after the app restarts, when the provider allows it
         try {
             context.contentResolver.takePersistableUriPermission(
                 uri,
@@ -98,17 +98,21 @@ private fun readAudio(context: Context, uris: List<Uri>): PickResult {
         }
 
         val durationMs = readDurationMs(context, uri)
-        if (durationMs == null || durationMs <= 0L) {
+
+        // UPDATED: WhatsApp .opus files often fail MediaMetadataRetriever.
+        // Instead of rejecting them, we allow them to pass with 0 duration.
+        if ((durationMs == null || durationMs <= 0L) && extension !in setOf("opus", "ogg")) {
             rejected += RejectedAudio(info.name, PickFailure.Unreadable)
             continue
         }
+        val safeDurationMs = durationMs ?: 0L
 
         accepted += PickedAudio(
             uri = uri.toString(),
             displayName = info.name,
             mimeType = info.mimeType,
             sizeBytes = info.sizeBytes,
-            durationMs = durationMs
+            durationMs = safeDurationMs
         )
     }
 

@@ -44,6 +44,8 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
             implementation(libs.androidx.activity.compose)
+
+            implementation("dev.ffmpegkit-maintained:ffmpeg-kit-full:8.1.9")
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

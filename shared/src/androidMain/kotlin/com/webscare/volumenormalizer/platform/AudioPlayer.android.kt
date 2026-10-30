@@ -46,7 +46,7 @@ private class AndroidAudioPlayer(
         .setUsage(AudioAttributes.USAGE_MEDIA)
         .build()
 
-    // Another app (call, music) takes the sound: pause
+
     private val focusListener = AudioManager.OnAudioFocusChangeListener { change ->
         if (change == AudioManager.AUDIOFOCUS_LOSS ||
             change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
@@ -128,7 +128,7 @@ private class AndroidAudioPlayer(
         seekTo(positionMs + deltaMs)
     }
 
-    /** Called by the screen every 250 ms to refresh the position while playing. */
+
     fun updatePosition() {
         val player = mediaPlayer ?: return
         if (!isPrepared || !isPlaying) return
@@ -211,7 +211,7 @@ actual fun rememberAudioPlayer(uri: String, durationMs: Long): AudioPlayer {
         }
     }
 
-    // Refresh the playback position 4 times a second
+
     LaunchedEffect(player) {
         while (true) {
             player.updatePosition()

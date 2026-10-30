@@ -14,8 +14,14 @@
     <string name="boost_strong">Strong</string>
     <string name="boost_max">Max</string>
 
-    <string name="boost_warning_protected">Strong boost can change the dynamics of your audio and make background noise easier to hear.</string>
-    <string name="boost_warning_unprotected">Strong boost without Peak Protection can cause clipping and distortion, and make background noise easier to hear.</string>
+    <string name="boost_warning_protected">A strong boost can make background noise easier to hear.</string>
+    <string name="boost_warning_unprotected">A strong boost without Peak Protection can cause clipping and distortion, and make background noise easier to hear.</string>
+
+    <string name="boost_analyzing">Analyzing the file…</string>
+    <string name="boost_analysis_failed">The file could not be analyzed.</string>
+    <string name="boost_headroom_limited">This file has loud peaks. Peak Protection will gently limit them, so the dynamics may change a little.</string>
+    <string name="boost_no_headroom">This file is already at its maximum level.</string>
+    <string name="boost_clipping_warning">With this boost the loud parts will be clipped and sound distorted.</string>
 
     <string name="boost_apply">Apply Boost</string>
 </resources>

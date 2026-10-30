@@ -2,10 +2,7 @@ package com.webscare.volumenormalizer.platform
 
 import androidx.compose.runtime.Composable
 
-/**
- * Plays one audio file. The values below can be read by a screen,
- * and the screen redraws by itself when they change.
- */
+
 interface AudioPlayer {
     val isPlaying: Boolean
     val positionMs: Long

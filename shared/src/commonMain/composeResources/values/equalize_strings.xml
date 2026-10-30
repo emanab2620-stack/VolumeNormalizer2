@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Equalize Tool (Editor Screen) -->
+    <string name="tool_equalize">Equalize</string>
+    <string name="editor_tool_equalize_subtitle">Shape tone and clarity</string>
+
+    <!-- Equalize Screen Titles -->
+    <string name="equalize_title">Equalize</string>
+    <string name="equalize_apply">Apply EQ</string>
+
+    <!-- Equalize Sections -->
+    <string name="equalize_presets_title">Presets</string>
+    <string name="equalize_bands_title">Frequency Bands</string>
+
+    <!-- Equalize Presets -->
+    <string name="equalize_preset_flat">Flat</string>
+    <string name="equalize_preset_bass_boost">Bass Boost</string>
+    <string name="equalize_preset_vocal">Vocal</string>
+    <string name="equalize_preset_treble">Treble</string>
+    <string name="equalize_preset_custom">Custom</string>
+</resources>
